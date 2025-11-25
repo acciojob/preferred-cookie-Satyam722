@@ -1,56 +1,46 @@
-//your JS code here. If required.
-// ------------------------------
-// Save cookie helper
-// ------------------------------
-function setCookie(name, value, days = 365) {
-  const expires = new Date(Date.now() + days * 864e5).toUTCString();
-  document.cookie = `${name}=${value}; expires=${expires}; path=/`;
-}
-
-// ------------------------------
-// Get cookie helper
-// ------------------------------
+// Helper: get cookie by name
 function getCookie(name) {
-  const cookies = document.cookie.split("; ");
+  const cookies = document.cookie.split(";").map(c => c.trim());
   for (let c of cookies) {
-    const [key, val] = c.split("=");
-    if (key === name) return val;
+    if (c.startsWith(name + "=")) {
+      return c.split("=")[1];
+    }
   }
   return null;
 }
 
-// ------------------------------
-// Apply saved preferences on load
-// ------------------------------
-window.addEventListener("DOMContentLoaded", () => {
-  const savedFontSize = getCookie("fontsize");
-  const savedFontColor = getCookie("fontcolor");
+document.addEventListener("DOMContentLoaded", () => {
+  const fontSizeInput = document.getElementById("fontsize");
+  const fontColorInput = document.getElementById("fontcolor");
+  const submitBtn = document.querySelector("input[type='submit']");
 
-  if (savedFontSize) {
-    document.documentElement.style.setProperty("--fontsize", `${savedFontSize}px`);
-    document.getElementById("fontsize").value = savedFontSize;
+  // ⭐ Apply saved cookies on load
+  const savedSize = getCookie("fontsize");
+  const savedColor = getCookie("fontcolor");
+
+  if (savedSize) {
+    document.body.style.fontSize = savedSize + "px";
+    fontSizeInput.value = savedSize;
   }
 
-  if (savedFontColor) {
-    document.documentElement.style.setProperty("--fontcolor", savedFontColor);
-    document.getElementById("fontcolor").value = savedFontColor;
+  if (savedColor) {
+    document.body.style.color = savedColor;
+    fontColorInput.value = savedColor;
   }
-});
 
-// ------------------------------
-// Save button functionality
-// ------------------------------
-document.getElementById("font-form").addEventListener("submit", function (e) {
-  e.preventDefault();
+  // ⭐ Save new values on submit
+  submitBtn.addEventListener("click", (e) => {
+    e.preventDefault();
 
-  const fontSize = document.getElementById("fontsize").value;
-  const fontColor = document.getElementById("fontcolor").value;
+    const size = fontSizeInput.value;
+    const color = fontColorInput.value;
 
-  // Save cookies
-  setCookie("fontsize", fontSize);
-  setCookie("fontcolor", fontColor);
+    // save cookies
+    document.cookie = `fontsize=${size}`;
+    document.cookie = `fontcolor=${color}`;
 
-  // Apply immediately
-  document.documentElement.style.setProperty("--fontsize", `${fontSize}px`);
-  document.documentElement.style.setProperty("--fontcolor", fontColor);
+    // apply styles
+    document.body.style.fontSize = size + "px";
+    document.body.style.color = color;
+  });
 });
